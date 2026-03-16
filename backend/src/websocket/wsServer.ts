@@ -20,6 +20,9 @@ export async function setupWebSocketServer(server: HttpServer) {
       const crossExchangeOpportunities = findCrossExchangeOpportunities(tickers);
       const spotFuturesOpportunities = findSpotFuturesOpportunities(tickers, fundingRates);
 
+      console.log(`Data stats: ${fundingRates.length} rates, ${tickers.length} tickers. ` +
+        `Opps: ${fundingOpportunities.length} funding, ${crossExchangeOpportunities.length} cross, ${spotFuturesOpportunities.length} spot/fut.`);
+
       const payload = JSON.stringify({
         type: 'MARKET_DATA_UPDATE',
         data: {
