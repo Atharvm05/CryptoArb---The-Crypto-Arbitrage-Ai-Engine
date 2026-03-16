@@ -86,8 +86,8 @@ export function useMarketData() {
   const [isManualUpdate, setIsManualUpdate] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<any>(null);
+  const heartbeatIntervalRef = useRef<any>(null);
 
   const requestUpdate = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
