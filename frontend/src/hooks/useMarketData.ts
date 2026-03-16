@@ -84,8 +84,10 @@ export function useMarketData() {
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isManualUpdate, setIsManualUpdate] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const requestUpdate = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -94,74 +96,81 @@ export function useMarketData() {
     }
   }, []);
 
-  useEffect(() => {
-    const connect = () => {
-      try {
-        const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:5001';
-        const ws = new WebSocket(wsUrl);
-        wsRef.current = ws;
+  const connect = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-        ws.onopen = () => {
-          setConnected(true);
-          setError(null);
-          console.log('WebSocket connected');
-          ws.send(JSON.stringify({ type: 'REQUEST_UPDATE' }));
-        };
+    try {
+      const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:5001';
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-        ws.onmessage = (event) => {
-          try {
-            const message = JSON.parse(event.data);
-            if (message.type === 'MARKET_DATA_UPDATE') {
-              setMarketData(message.data);
-              setIsManualUpdate(false); // Reset manual update flag after data arrives
-            }
-          } catch (e) {
-            console.error('Failed to parse WS message:', e);
+      ws.onopen = () => {
+        setConnected(true);
+        setError(null);
+        console.log('WebSocket connected');
+        ws.send(JSON.stringify({ type: 'REQUEST_UPDATE' }));
+        
+        // Start heartbeat
+        if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'PING' }));
           }
-        };
+        }, 20000); // Ping every 20 seconds
+      };
 
-        ws.onclose = () => {
-          setConnected(false);
-          reconnectTimeoutRef.current = window.setTimeout(connect, 3000);
-        };
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          if (message.type === 'MARKET_DATA_UPDATE') {
+            if (autoRefresh || isManualUpdate) {
+              setMarketData(message.data);
+              setLastUpdated(new Date());
+              setIsManualUpdate(false);
+            }
+          } else if (message.type === 'PONG') {
+            // Heartbeat received
+          }
+        } catch (e) {
+          console.error('Failed to parse WebSocket message:', e);
+        }
+      };
 
-        ws.onerror = () => {
-          setError('Connection error');
-          ws.close();
-        };
-      } catch (e) {
-        setError('Failed to connect');
-      }
-    };
+      ws.onclose = () => {
+        setConnected(false);
+        console.log('WebSocket disconnected, attempting reconnect...');
+        if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
+        
+        // Exponential backoff for reconnection
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = setTimeout(connect, 3000);
+      };
 
+      ws.onerror = (e) => {
+        console.error('WebSocket error:', e);
+        setError('Connection error occurred');
+        ws.close();
+      };
+    } catch (e) {
+      console.error('WebSocket connection failed:', e);
+      setError('Failed to connect to server');
+    }
+  }, [autoRefresh, isManualUpdate]);
+
+  useEffect(() => {
     connect();
     return () => {
-      wsRef.current?.close();
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
+      if (wsRef.current) {
+        wsRef.current.onclose = null; // Prevent reconnect on unmount
+        wsRef.current.close();
       }
     };
-  }, []);
-
-  // Use a second state to "freeze" the data when autoRefresh is OFF
-  const [frozenData, setFrozenData] = useState<MarketData>(marketData);
-
-  useEffect(() => {
-    // Update frozenData ONLY if autoRefresh is ON OR if we just triggered a manual update
-    if (autoRefresh || isManualUpdate) {
-      setFrozenData(marketData);
-    }
-  }, [marketData, autoRefresh, isManualUpdate]);
-
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  useEffect(() => {
-    if (marketData.fundingRates.length > 0) {
-      setLastUpdated(new Date());
-    }
-  }, [marketData]);
+  }, [connect]);
 
   return { 
-    marketData: frozenData, 
+    marketData, 
     connected, 
     error, 
     autoRefresh, 

@@ -51,16 +51,22 @@ export async function setupWebSocketServer(server: HttpServer) {
 
   wss.on('connection', (ws: WebSocket) => {
     console.log('New WebSocket connection established.');
+    
+    // Set up ping-pong to detect dead connections
+    (ws as any).isAlive = true;
+    ws.on('pong', () => { (ws as any).isAlive = true; });
 
     // Send an initial message
     ws.send(JSON.stringify({ type: 'CONNECTION_SUCCESS', message: 'Connected to CryptoArb AI WebSocket server' }));
 
     ws.on('message', async (message: string) => {
       try {
-        const data = JSON.parse(message);
+        const data = JSON.parse(message.toString());
         if (data.type === 'REQUEST_UPDATE') {
           console.log('Manual update requested by client');
           await broadcastData(ws);
+        } else if (data.type === 'PING') {
+          ws.send(JSON.stringify({ type: 'PONG' }));
         }
       } catch (e) {
         console.error('Failed to handle incoming message:', e);
@@ -70,6 +76,19 @@ export async function setupWebSocketServer(server: HttpServer) {
     ws.on('close', () => {
       console.log('WebSocket connection closed.');
     });
+  });
+
+  // Keep-alive heartbeat every 30 seconds
+  const interval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      if ((ws as any).isAlive === false) return ws.terminate();
+      (ws as any).isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', () => {
+    clearInterval(interval);
   });
 
   // Broadcast market data every 5 seconds
