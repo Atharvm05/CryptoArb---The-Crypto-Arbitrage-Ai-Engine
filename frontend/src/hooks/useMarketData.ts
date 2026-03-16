@@ -96,7 +96,8 @@ export function useMarketData() {
   useEffect(() => {
     const connect = () => {
       try {
-        const ws = new WebSocket('ws://localhost:5001');
+        const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:5001';
+        const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
         ws.onopen = () => {
