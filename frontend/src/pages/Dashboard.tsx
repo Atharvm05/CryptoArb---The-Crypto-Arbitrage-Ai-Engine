@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useMarketData } from '../hooks/useMarketData';
-import { ArrowUpRight, ArrowDownRight, RefreshCw, Search, Filter, ArrowUpDown } from 'lucide-react';
+import { RefreshCw, Search, Filter, ArrowUpDown } from 'lucide-react';
 
 export type FundingMatrixRow = {
   coin: string;
@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.03]">
-                {filteredData.map((row, i) => (
+                {filteredData.map((row) => (
                   <tr key={row.coin} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-6 py-4 sticky left-0 bg-[#0a0a0a] z-10 group-hover:bg-[#111] transition-colors">
                       <div className="flex items-center gap-3">

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export type FundingRateData = {
   exchange: string;
   symbol: string;
+  coin: string;
   fundingRate: number;
   timestamp: number;
   markPrice?: number;
