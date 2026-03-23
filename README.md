@@ -1,8 +1,5 @@
 # CryptoArb — The Crypto Arbitrage AI Engine
 
-[![Deploy to Vercel (Frontend)](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAtharvm05%2FCryptoArb---The-Crypto-Arbitrage-Ai-Engine&root-directory=frontend)
-[![Deploy to Render (Backend)](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Atharvm05/CryptoArb---The-Crypto-Arbitrage-Ai-Engine)
-
 CryptoArb AI is a professional-grade, high-performance cryptocurrency arbitrage platform designed to identify and track profitable opportunities across 15+ global exchanges in real-time. 
 
 ## 🚀 Features
