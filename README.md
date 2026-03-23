@@ -1,7 +1,7 @@
-# CryptoArb AI — Real-time Crypto Arbitrage Intelligence
+# CryptoArb — The Crypto Arbitrage AI Engine
 
-[![Deploy to Vercel (Frontend)](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAtharvm05%2FCryptoArb-AI-Real-Time-Crypto-Arbitrage-Engine&root-directory=frontend)
-[![Deploy to Render (Backend)](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Atharvm05/CryptoArb-AI-Real-Time-Crypto-Arbitrage-Engine)
+[![Deploy to Vercel (Frontend)](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAtharvm05%2FCryptoArb---The-Crypto-Arbitrage-Ai-Engine&root-directory=frontend)
+[![Deploy to Render (Backend)](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Atharvm05/CryptoArb---The-Crypto-Arbitrage-Ai-Engine)
 
 CryptoArb AI is a professional-grade, high-performance cryptocurrency arbitrage platform designed to identify and track profitable opportunities across 15+ global exchanges in real-time. 
 
@@ -38,8 +38,8 @@ CryptoArb AI is a professional-grade, high-performance cryptocurrency arbitrage 
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Atharvm05/CryptoArb-AI-Real-Time-Crypto-Arbitrage-Engine.git
-cd CryptoArb-AI-Real-Time-Crypto-Arbitrage-Engine
+git clone https://github.com/Atharvm05/CryptoArb---The-Crypto-Arbitrage-Ai-Engine.git
+cd CryptoArb---The-Crypto-Arbitrage-Ai-Engine
 ```
 
 ### 2. Setup Backend
@@ -48,7 +48,7 @@ cd backend
 npm install
 npm run dev
 ```
-The backend will start on `http://localhost:3000` and begin scanning 15+ exchanges.
+The backend will start on `http://localhost:5001` and begin scanning 15+ exchanges.
 
 ### 3. Setup Frontend
 ```bash
